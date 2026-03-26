@@ -50,3 +50,6 @@ Basic error handling is implemented using Swift's `Result` type. Errors are prop
 > 
 > **For this submission, the token has been removed.**
 > If you run the app and encounter rate limit errors (403), please refer to the comments in `APIClient.swift` for instructions on how to temporarily add your own token or reduce the request volume.
+### 5. Screenshot
+<img width="391" height="812" alt="Screenshot 2026-03-26 at 11 54 53" src="https://github.com/user-attachments/assets/fa9c854d-ce7a-40e0-bdf3-fa1c83545fac" />
+
