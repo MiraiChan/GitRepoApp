@@ -11,17 +11,17 @@ final class RepositoryCell: UITableViewCell {
   
   static let identifier = "RepositoryCell"
   
+  //shadow is under the container
+  private let shadowView = UIView()
   private let containerView = UIView()
+  
   private let nameLabel = UILabel()
   private let starsLabel = UILabel()
   private let descriptionLabel = UILabel()
   private let commitLabel = UILabel()
   private let commitActivity = UIActivityIndicatorView(style: .medium)
-  
-  // Stack for the repo name and stars
   private let titleStack = UIStackView()
   
-  // for custom corners
   private struct CornerRadii {
     let topLeft: CGFloat
     let topRight: CGFloat
@@ -41,23 +41,23 @@ final class RepositoryCell: UITableViewCell {
   
   private func setupUI() {
     selectionStyle = .none
+    backgroundColor = .clear
+    contentView.backgroundColor = .clear
     
-    // Container
+    //Shadow view
+    shadowView.translatesAutoresizingMaskIntoConstraints = false
+    shadowView.backgroundColor = .clear
+    contentView.addSubview(shadowView)
+    
+    //Container view
     containerView.translatesAutoresizingMaskIntoConstraints = false
-    containerView.backgroundColor = UIColor.systemMint.withAlphaComponent(0.3)
-    containerView.layer.shadowColor = UIColor.black.cgColor
-    containerView.layer.shadowOpacity = 0.08
-    containerView.layer.shadowRadius = 4
-    containerView.layer.shadowOffset = CGSize(width: 0, height: 2)
-    containerView.layer.shouldRasterize = true
-    containerView.layer.rasterizationScale = UIScreen.main.scale
+    containerView.backgroundColor = UIColor.systemMint.withAlphaComponent(1)
     contentView.addSubview(containerView)
     
-    // Labels
+    //Labels setup
     [nameLabel, starsLabel, descriptionLabel, commitLabel, commitActivity].forEach {
       $0.translatesAutoresizingMaskIntoConstraints = false
     }
-    
     nameLabel.font = .boldSystemFont(ofSize: 16)
     starsLabel.font = .systemFont(ofSize: 14)
     descriptionLabel.font = .systemFont(ofSize: 14)
@@ -65,7 +65,7 @@ final class RepositoryCell: UITableViewCell {
     commitLabel.font = .italicSystemFont(ofSize: 13)
     commitLabel.numberOfLines = 2
     
-    // Title stack
+    //Title stack
     titleStack.axis = .horizontal
     titleStack.spacing = 6
     titleStack.alignment = .center
@@ -79,12 +79,17 @@ final class RepositoryCell: UITableViewCell {
     containerView.addSubview(commitLabel)
     containerView.addSubview(commitActivity)
     
-    // Constraints
+    //Constraints
     NSLayoutConstraint.activate([
-      containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-      containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-      containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-      containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+      shadowView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+      shadowView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+      shadowView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+      shadowView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+      
+      containerView.topAnchor.constraint(equalTo: shadowView.topAnchor),
+      containerView.leadingAnchor.constraint(equalTo: shadowView.leadingAnchor),
+      containerView.trailingAnchor.constraint(equalTo: shadowView.trailingAnchor),
+      containerView.bottomAnchor.constraint(equalTo: shadowView.bottomAnchor),
       
       titleStack.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 12),
       titleStack.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 12),
@@ -104,13 +109,23 @@ final class RepositoryCell: UITableViewCell {
     ])
   }
   
-  // MARK: - Layout for custom radius
+  // MARK: - Layout for custom radius and shadow
   override func layoutSubviews() {
     super.layoutSubviews()
     
     let radii = CornerRadii(topLeft: 0, topRight: 10, bottomLeft: 10, bottomRight: 30)
+    let path = pathWithCustomCorners(bounds: containerView.bounds, radii: radii).cgPath
+    
+    //shadowView
+    shadowView.layer.shadowPath = path
+    shadowView.layer.shadowColor = UIColor.black.cgColor
+    shadowView.layer.shadowOpacity = 0.3
+    shadowView.layer.shadowRadius = 4
+    shadowView.layer.shadowOffset = CGSize(width: 0, height: 2)
+    
+    // custom corner masks containerView
     let maskLayer = CAShapeLayer()
-    maskLayer.path = pathWithCustomCorners(bounds: containerView.bounds, radii: radii).cgPath
+    maskLayer.path = path
     containerView.layer.mask = maskLayer
   }
   
@@ -152,17 +167,6 @@ final class RepositoryCell: UITableViewCell {
     
     path.close()
     return path
-  }
-  
-  override func prepareForReuse() {
-    super.prepareForReuse()
-    
-    nameLabel.text = nil
-    starsLabel.text = nil
-    descriptionLabel.text = nil
-    commitLabel.text = nil
-    
-    commitActivity.stopAnimating()
   }
   
   // MARK: - Configure
